@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SUPER MARIO – PENGEMBARAAN DUNIA WANG</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Fredoka', cursive, sans-serif;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            background-color: #1e293b;
+        }
+        .pixel-font {
+            font-family: 'Press Start 2P', cursive;
+        }
+        canvas {
+            image-rendering: pixelated;
+            background: linear-gradient(to bottom, #60a5fa, #bfdbfe);
+        }
+        .shadow-retro {
+            box-shadow: 0 8px 0 rgba(0,0,0,0.25);
+        }
+        .btn-retro {
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .btn-retro:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.2) !important;
+        }
+        /* Custom scrollbar for modal content */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4 text-slate-800">
+
+    <!-- Main Container -->
+    <div class="relative w-full max-w-4xl bg-sky-200 rounded-3xl overflow-hidden shadow-2xl border-4 border-yellow-400 flex flex-col min-h-[600px]">
+        
+        <!-- Top HUD Header -->
+        <header class="bg-gradient-to-r from-red-600 via-red-500 to-red-600 text-white p-3 px-4 flex flex-wrap justify-between items-center z-10 border-b-4 border-yellow-400">
+            <div class="flex items-center space-x-3">
+                <span class="text-xl md:text-2xl">🍄</span>
+                <div>
+                    <h1 class="text-sm md:text-base font-bold leading-tight pixel-font text-yellow-300">DUNIA WANG</h1>
+                    <!-- UPDATED: Displays Player Name and Class dynamically in HUD -->
+                    <p id="hud-player-info" class="text-xs text-red-100 font-semibold">Pemain: - (Tahun 4 KSSRPK)</p>
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="flex items-center space-x-4 text-sm md:text-base font-bold">
+                <!-- Hearts / Lives -->
+                <div class="bg-red-800/60 px-3 py-1 rounded-full flex items-center space-x-1 border border-red-300">
+                    <span class="text-lg">❤️</span>
+                    <span id="hud-lives" class="text-white text-lg">3</span>
+                </div>
+                <!-- Coins -->
+                <div class="bg-yellow-600/60 px-3 py-1 rounded-full flex items-center space-x-1 border border-yellow-300">
+                    <span class="text-lg">🪙</span>
+                    <span id="hud-coins" class="text-yellow-200 text-lg">0</span>
+                </div>
+                <!-- Audio Controls -->
+                <button id="btn-audio" onclick="toggleAudio()" class="bg-red-700 hover:bg-red-800 p-2 rounded-full border border-yellow-300 transition" title="Muzik On/Off">
+                    🔊
+                </button>
+            </div>
+        </header>
+
+        <!-- Game Area Canvas & Dynamic Screens -->
+        <div class="relative flex-grow flex items-center justify-center bg-sky-300 overflow-hidden min-h-[400px]">
+            <!-- Interactive Canvas -->
+            <canvas id="gameCanvas" class="w-full h-full absolute inset-0"></canvas>
+
+            <!-- 1. MAIN MENU OVERLAY -->
+            <div id="screen-menu" class="absolute inset-0 bg-sky-400/95 flex flex-col items-center justify-center p-6 text-center z-20">
+                <div class="animate-bounce mb-2">
+                    <span class="text-5xl md:text-6xl">🍄⭐🪙</span>
+                </div>
+                <h1 class="text-2xl md:text-4xl font-extrabold text-yellow-300 drop-shadow-[0_4px_0_rgba(0,0,0,0.8)] pixel-font mb-1 leading-snug">
+                    SUPER MARIO
+                </h1>
+                <h2 class="text-lg md:text-xl font-bold text-white drop-shadow-md mb-4 bg-red-600 px-5 py-1.5 rounded-full border-2 border-yellow-400">
+                    Pengembaraan Dunia Wang
+                </h2>
+                
+                <!-- NEW: Input Form for Student Name and Class -->
+                <div class="bg-white/95 p-4 rounded-2xl border-4 border-sky-600 shadow-xl w-full max-w-md mb-4 text-left">
+                    <div class="mb-3">
+                        <label for="player-name" class="block text-slate-800 font-bold text-sm mb-1">
+                            👤 Nama Murid:
+                        </label>
+                        <input type="text" id="player-name" placeholder="Masukkan nama anda..." 
+                            class="w-full px-3 py-2 border-2 border-sky-400 rounded-xl text-slate-800 font-bold focus:outline-none focus:border-red-500 bg-slate-50 text-sm md:text-base" />
+                    </div>
+                    <div>
+                        <label for="player-class" class="block text-slate-800 font-bold text-sm mb-1">
+                            🏫 Kelas:
+                        </label>
+                        <input type="text" id="player-class" placeholder="Cth: 4 KSSRPK / 4 Amanah" 
+                            class="w-full px-3 py-2 border-2 border-sky-400 rounded-xl text-slate-800 font-bold focus:outline-none focus:border-red-500 bg-slate-50 text-sm md:text-base" />
+                    </div>
+                    <p id="menu-error-msg" class="text-red-600 text-xs font-bold mt-2 hidden text-center">
+                        ⚠️ Sila masukkan Nama Murid dan Kelas sebelum mula!
+                    </p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 w-full max-w-xs sm:max-w-md">
+                    <button onclick="validateAndStartGame()" class="btn-retro w-full bg-green-500 hover:bg-green-400 text-white font-extrabold text-lg md:text-xl py-3 rounded-2xl border-b-8 border-green-700 shadow-retro flex items-center justify-center space-x-2">
+                        <span>▶️</span> <span>MULA MAIN</span>
+                    </button>
+                    <button onclick="showInstructions()" class="btn-retro w-full bg-yellow-400 hover:bg-yellow-300 text-slate-900 font-extrabold text-lg md:text-xl py-3 rounded-2xl border-b-8 border-yellow-600 shadow-retro flex items-center justify-center space-x-2">
+                        <span>📖</span> <span>ARAHAN</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. INSTRUCTIONS OVERLAY -->
+            <div id="screen-instructions" class="hidden absolute inset-0 bg-slate-900/90 text-white p-6 z-30 flex flex-col items-center justify-center">
+                <div class="bg-white text-slate-800 p-6 rounded-3xl max-w-lg w-full border-4 border-yellow-400 shadow-2xl flex flex-col max-h-[90%]">
+                    <h2 class="text-2xl font-bold text-red-600 border-b-4 border-yellow-400 pb-2 mb-4 text-center flex items-center justify-center gap-2">
+                        <span>📖</span> Arahan Permainan
+                    </h2>
+                    <div class="overflow-y-auto space-y-3 text-sm md:text-base pr-2">
+                        <div class="flex items-start gap-3 bg-sky-50 p-3 rounded-xl border border-sky-200">
+                            <span class="text-2xl">🏃</span>
+                            <p><strong>Pergerakan:</strong> Gunakan butang kiri/kanan atau kekunci panah untuk bergerak ke bendera checkpoint.</p>
+                        </div>
+                        <div class="flex items-start gap-3 bg-yellow-50 p-3 rounded-xl border border-yellow-200">
+                            <span class="text-2xl">❓</span>
+                            <p><strong>Kuis Matematik:</strong> Setiap checkpoint mengandungi soalan tambah wang RM & sen.</p>
+                        </div>
+                        <div class="flex items-start gap-3 bg-green-50 p-3 rounded-xl border border-green-200">
+                            <span class="text-2xl">🪙</span>
+                            <p><strong>Ganjaran:</strong> Setiap jawapan betul memberikan <strong>10 Syiling Emas</strong>!</p>
+                        </div>
+                        <div class="flex items-start gap-3 bg-red-50 p-3 rounded-xl border border-red-200">
+                            <span class="text-2xl">❤️</span>
+                            <p><strong>Nyawa:</strong> Anda diberi 3 nyawa. Jika salah, guna bentuk lazim yang disediakan untuk mencuba lagi!</p>
+                        </div>
+                    </div>
+                    <button onclick="hideInstructions()" class="btn-retro mt-4 w-full bg-red-500 hover:bg-red-400 text-white font-bold text-lg py-3 rounded-xl border-b-4 border-red-700">
+                        TUTUP & KEMBALI
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3. KUIZ MATH CHECKPOINT MODAL -->
+            <div id="screen-quiz" class="hidden absolute inset-0 bg-black/75 z-40 flex items-center justify-center p-3 md:p-6 backdrop-blur-sm">
+                <div class="bg-white rounded-3xl border-4 border-yellow-400 shadow-2xl p-4 md:p-6 max-w-lg w-full flex flex-col items-center animate-fade-in">
+                    
+                    <!-- Checkpoint Header -->
+                    <div id="quiz-header" class="bg-gradient-to-r from-sky-500 to-blue-600 text-white text-center py-2 px-4 rounded-full font-bold text-sm md:text-base mb-3 shadow-md w-full flex items-center justify-between">
+                        <span id="quiz-world-title">Dunia 1: Dunia Syiling Emas</span>
+                        <span id="quiz-checkpoint-badge" class="bg-yellow-400 text-slate-900 px-3 py-0.5 rounded-full text-xs font-extrabold">1 / 5</span>
+                    </div>
+
+                    <!-- Question Prompt -->
+                    <h3 class="text-lg md:text-xl font-bold text-slate-800 text-center mb-2">
+                        Kira jumlah nilai wang di bawah:
+                    </h3>
+
+                    <!-- Bentuk Lazim (Vertical Math Format) - Special SEN Design for SEN students -->
+                    <div class="bg-yellow-50 border-4 border-yellow-300 rounded-2xl p-4 w-full max-w-xs my-2 flex flex-col items-end font-mono text-2xl md:text-3xl font-bold text-slate-800 shadow-inner relative">
+                        <!-- Helper tags -->
+                        <div class="w-full flex justify-between text-xs font-sans text-slate-500 mb-1 font-semibold border-b border-yellow-200 pb-1">
+                            <span class="text-red-500">Ringgit (RM)</span>
+                            <span class="text-blue-500">Sen</span>
+                        </div>
+                        
+                        <!-- Value 1 -->
+                        <div class="flex items-center justify-end w-full space-x-1">
+                            <span id="val1-rm" class="text-red-600">RM 65</span>
+                            <span id="val1-dot" class="text-slate-400">.</span>
+                            <span id="val1-sen" class="text-blue-600">00</span>
+                        </div>
+                        <!-- Value 2 -->
+                        <div class="flex items-center justify-between w-full space-x-1 border-b-4 border-slate-800 pb-1">
+                            <span class="text-green-600 font-sans font-extrabold">+</span>
+                            <div>
+                                <span id="val2-rm" class="text-red-600">RM 22</span>
+                                <span id="val2-dot" class="text-slate-400">.</span>
+                                <span id="val2-sen" class="text-blue-600">00</span>
+                            </div>
+                        </div>
+                        <!-- Answer placeholder line -->
+                        <div class="w-full text-right pt-1 text-slate-400 tracking-widest text-xl">
+                            RM <span class="border-b-2 border-dashed border-slate-400 px-2">? ? . ? ?</span>
+                        </div>
+                    </div>
+
+                    <!-- Visual Helper / Hint Message -->
+                    <div id="quiz-hint" class="text-xs md:text-sm text-center text-slate-600 bg-sky-100 p-2 rounded-xl mb-4 w-full border border-sky-200">
+                        💡 <strong>Petunjuk:</strong> Tambahkan bahagian Sen dahulu, kemudian bahagian Ringgit.
+                    </div>
+
+                    <!-- Answer Options -->
+                    <div id="quiz-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+                        <!-- Options injected dynamically by JS -->
+                    </div>
+
+                    <!-- Feedback Overlay Message inside Quiz -->
+                    <div id="quiz-feedback" class="hidden mt-3 text-center p-2 rounded-xl font-bold w-full text-base animate-pulse"></div>
+                </div>
+            </div>
+
+            <!-- 4. BONUS WORKSHEET CHALLENGE SCREEN -->
+            <div id="screen-bonus" class="hidden absolute inset-0 bg-gradient-to-b from-purple-900 to-indigo-900 text-white p-4 md:p-6 z-40 flex flex-col items-center justify-center overflow-y-auto">
+                <div class="bg-white text-slate-800 rounded-3xl p-5 max-w-xl w-full border-4 border-yellow-400 shadow-2xl flex flex-col my-auto">
+                    <div class="text-center mb-4">
+                        <span class="text-4xl">👑⭐</span>
+                        <h2 class="text-2xl font-black text-purple-700 pixel-font mt-1">CABARAN BONUS ISTANA!</h2>
+                        <p class="text-xs md:text-sm text-slate-600 font-semibold">Selesaikan Lembaran Kerja Matematik Tambahan Wang</p>
+                    </div>
+
+                    <div id="bonus-questions-container" class="space-y-3 max-h-[280px] overflow-y-auto pr-2">
+                        <!-- Dynamic Bonus Questions -->
+                    </div>
+
+                    <button id="btn-submit-bonus" onclick="checkBonusAnswers()" class="btn-retro mt-4 w-full bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-lg py-3 rounded-xl border-b-4 border-purple-800 shadow-md">
+                        HANTAR JAWAPAN CABARAN
+                    </button>
+                </div>
+            </div>
+
+            <!-- 5. VICTORY / GAME OVER SCREEN -->
+            <div id="screen-end" class="hidden absolute inset-0 bg-slate-900/95 z-50 flex flex-col items-center justify-center p-6 text-center text-white">
+                <div id="end-icon" class="text-6xl mb-1 animate-bounce">🏰</div>
+                <h1 id="end-title" class="text-xl md:text-3xl font-extrabold text-yellow-300 pixel-font mb-1 drop-shadow-md">
+                    TAHNIAH, WIRA DUNIA WANG!
+                </h1>
+                
+                <!-- NEW: End Screen Personal Badge for Student -->
+                <div class="bg-red-600/90 text-white px-4 py-1.5 rounded-full border-2 border-yellow-400 mb-4 text-sm md:text-base font-extrabold shadow-md">
+                    <span id="end-player-badge">Ahmad (4 KSSRPK)</span>
+                </div>
+
+                <p id="end-subtitle" class="text-xs md:text-sm text-emerald-300 font-bold mb-4 max-w-md">
+                    Anda telah berjaya menamatkan semua checkpoint Matematik!
+                </p>
+
+                <!-- Score Summary Box -->
+                <div class="bg-white/10 backdrop-blur-md border-2 border-yellow-400/50 rounded-2xl p-4 w-full max-w-sm mb-6 space-y-2">
+                    <div class="flex justify-between items-center text-base font-semibold">
+                        <span>Soalan Betul:</span>
+                        <span id="end-score" class="text-green-400 font-bold text-xl">5 / 5</span>
+                    </div>
+                    <div class="flex justify-between items-center text-base font-semibold">
+                        <span>Jumlah Syiling:</span>
+                        <span id="end-coins" class="text-yellow-300 font-bold text-xl">50 🪙</span>
+                    </div>
+                    <div class="flex justify-between items-center text-base font-semibold">
+                        <span>Bonus Selesai:</span>
+                        <span id="end-bonus" class="text-purple-300 font-bold text-xl">4 / 4</span>
+                    </div>
+                </div>
+
+                <button onclick="restartGame()" class="btn-retro bg-yellow-400 hover:bg-yellow-300 text-slate-900 font-extrabold text-xl px-8 py-4 rounded-2xl border-b-8 border-yellow-600 shadow-retro flex items-center space-x-2">
+                    <span>🔄</span> <span>MAIN LAGI</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- On-screen Touch Controls (Mobile Friendly) -->
+        <div class="bg-slate-800 p-3 flex justify-between items-center border-t-4 border-yellow-400 z-10">
+            <div class="flex space-x-2">
+                <button id="btn-left" class="btn-retro bg-sky-500 hover:bg-sky-400 text-white font-bold text-xl w-14 h-12 rounded-xl border-b-4 border-sky-700 flex items-center justify-center select-none active:bg-sky-600">
+                    ⬅️
+                </button>
+                <button id="btn-right" class="btn-retro bg-sky-500 hover:bg-sky-400 text-white font-bold text-xl w-14 h-12 rounded-xl border-b-4 border-sky-700 flex items-center justify-center select-none active:bg-sky-600">
+                    ➡️
+                </button>
+            </div>
+            
+            <div class="text-xs text-yellow-300 font-bold hidden sm:block text-center px-2">
+                Gunakan [Anak Panah Kiri/Kanan] atau Butang Skrin untuk Bergerak
+            </div>
+
+            <button id="btn-jump" class="btn-retro bg-green-500 hover:bg-green-400 text-white font-bold text-sm w-24 h-12 rounded-xl border-b-4 border-green-700 flex items-center justify-center select-none active:bg-green-600">
+                LOMPAT 🦘
+            </button>
+        </div>
+    </div>
+
+    <!-- Audio Synthesizer & Logic JavaScript -->
+    <script>
+        /**
+         * AUDIO SYNTHESIZER (No external audio files needed - works offline reliably)
+         */
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+                this.bgmTimer = null;
+                this.isPlayingBgm = false;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+
+            playTone(freq, type = 'sine', duration = 0.1, vol = 0.1) {
+                if (this.muted) return;
+                this.init();
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch (e) {}
+            }
+
+            playCoin() {
+                this.playTone(987.77, 'sine', 0.08, 0.2); // B5
+                setTimeout(() => this.playTone(1318.51, 'sine', 0.25, 0.2), 80); // E6
+            }
+
+            playCorrect() {
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                notes.forEach((freq, idx) => {
+                    setTimeout(() => this.playTone(freq, 'triangle', 0.12, 0.2), idx * 90);
+                });
+            }
+
+            playWrong() {
+                this.playTone(220, 'sawtooth', 0.15, 0.2);
+                setTimeout(() => this.playTone(180, 'sawtooth', 0.25, 0.2), 150);
+            }
+
+            playJump() {
+                if (this.muted) return;
+                this.init();
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(150, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(400, this.ctx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.15);
+                } catch(e) {}
+            }
+
+            startBGM() {
+                if (this.isPlayingBgm) return;
+                this.isPlayingBgm = true;
+                
+                // Classic Mario-inspired catchy melody sequence (Frequencies)
+                const melody = [
+                    {f: 659.25, d: 0.15}, {f: 659.25, d: 0.15}, {f: 0, d: 0.15}, {f: 659.25, d: 0.15}, 
+                    {f: 0, d: 0.15}, {f: 523.25, d: 0.15}, {f: 659.25, d: 0.15}, {f: 783.99, d: 0.30}, 
+                    {f: 0, d: 0.15}, {f: 392.00, d: 0.30}, {f: 0, d: 0.15}
+                ];
+                
+                let step = 0;
+                const playNext = () => {
+                    if (!this.isPlayingBgm || this.muted) return;
+                    const note = melody[step];
+                    if (note.f > 0) {
+                        this.playTone(note.f, 'square', note.d, 0.03);
+                    }
+                    step = (step + 1) % melody.length;
+                    this.bgmTimer = setTimeout(playNext, (note.d + 0.05) * 1000);
+                };
+                playNext();
+            }
+
+            stopBGM() {
+                this.isPlayingBgm = false;
+                if (this.bgmTimer) clearTimeout(this.bgmTimer);
+            }
+        }
+
+        const snd = new SoundEngine();
+
+        function toggleAudio() {
+            snd.muted = !snd.muted;
+            const btn = document.getElementById('btn-audio');
+            btn.innerText = snd.muted ? '🔇' : '🔊';
+            if (!snd.muted) {
+                snd.init();
+                snd.startBGM();
+            } else {
+                snd.stopBGM();
+            }
+        }
+
+        /**
+         * GAME DATA & QUESTION BANK (KSSRPK Tahun 4 Unit 6: Wang)
+         */
+        const CHECKPOINTS_DATA = [
+            {
+                id: 1,
+                title: "Dunia 1: Dunia Syiling Emas",
+                v1_rm: "65", v1_sen: "00",
+                v2_rm: "22", v2_sen: "00",
+                correct: "RM87.00",
+                options: ["RM87.00", "RM78.00"],
+                hint: "65 tambah 22 = 87"
+            },
+            {
+                id: 2,
+                title: "Dunia 2: Dunia Duit Ajaib",
+                v1_rm: "31", v1_sen: "60",
+                v2_rm: "41", v2_sen: "10",
+                correct: "RM72.70",
+                options: ["RM77.20", "RM72.70"],
+                hint: "Sen: 60 + 10 = 70 sen. Ringgit: 31 + 41 = RM72."
+            },
+            {
+                id: 3,
+                title: "Dunia 3: Dunia Hutan Wang",
+                v1_rm: "54", v1_sen: "50",
+                v2_rm: "15", v2_sen: "30",
+                correct: "RM69.80",
+                options: ["RM69.80", "RM68.90"],
+                hint: "Sen: 50 + 30 = 80 sen. Ringgit: 54 + 15 = RM69."
+            },
+            {
+                id: 4,
+                title: "Dunia 4: Jambatan Duit",
+                v1_rm: "12", v1_sen: "80",
+                v2_rm: "73", v2_sen: "00",
+                correct: "RM85.80",
+                options: ["RM85.80", "RM83.80"],
+                hint: "Sen: 80 + 00 = 80 sen. Ringgit: 12 + 73 = RM85."
+            },
+            {
+                id: 5,
+                title: "Dunia 5: Istana Raja Wang",
+                v1_rm: "28", v1_sen: "60",
+                v2_rm: "61", v2_sen: "10",
+                correct: "RM89.70",
+                options: ["RM89.70", "RM87.90"],
+                hint: "Sen: 60 + 10 = 70 sen. Ringgit: 28 + 61 = RM89."
+            }
+        ];
+
+        const BONUS_DATA = [
+            { q: "RM33.20 + RM42.30 =", ans: "75.50" },
+            { q: "RM31.50 + RM68.20 =", ans: "99.70" },
+            { q: "RM21.20 + RM76.60 =", ans: "97.80" },
+            { q: "RM43.50 + RM36.20 =", ans: "79.70" }
+        ];
+
+        /**
+         * GAME STATE & CANVAS ENGINE
+         */
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let gameState = {
+            playerName: "",
+            playerClass: "",
+            lives: 3,
+            coins: 0,
+            currentCP: 0, // 0 to 4
+            score: 0,
+            bonusScore: 0,
+            activeQuiz: false,
+            gameCompleted: false
+        };
+
+        // Player Avatar Object
+        const player = {
+            x: 50,
+            y: 200,
+            width: 36,
+            height: 48,
+            vx: 0,
+            vy: 0,
+            speed: 3.5,
+            jumpPower: -9.5,
+            grounded: false,
+            frame: 0,
+            animTimer: 0
+        };
+
+        // Input handler
+        const keys = { left: false, right: false, up: false };
+
+        // World Checkpoints positions (X coordinates)
+        const flagPositions = [220, 500, 800, 1100, 1400];
+        const WORLD_WIDTH = 1650;
+        let cameraX = 0;
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        /**
+         * KEYBOARD & TOUCH CONTROLS
+         */
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
+            if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
+            if (e.key === 'ArrowUp' || e.key === ' ' || e.key === 'w') {
+                keys.up = true;
+                doJump();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
+            if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
+            if (e.key === 'ArrowUp' || e.key === ' ' || e.key === 'w') keys.up = false;
+        });
+
+        // Touch Control Binding
+        function bindTouch(btnId, keyName) {
+            const btn = document.getElementById(btnId);
+            const start = (e) => {
+                e.preventDefault();
+                keys[keyName] = true;
+                if (keyName === 'up') doJump();
+            };
+            const end = (e) => {
+                e.preventDefault();
+                keys[keyName] = false;
+            };
+            btn.addEventListener('touchstart', start, {passive: false});
+            btn.addEventListener('touchend', end, {passive: false});
+            btn.addEventListener('mousedown', start);
+            btn.addEventListener('mouseup', end);
+        }
+
+        bindTouch('btn-left', 'left');
+        bindTouch('btn-right', 'right');
+        bindTouch('btn-jump', 'up');
+
+        function doJump() {
+            if (player.grounded && !gameState.activeQuiz) {
+                player.vy = player.jumpPower;
+                player.grounded = false;
+                snd.playJump();
+            }
+        }
+
+        /**
+         * RENDER FUNCTIONS (CANVAS PLATFORMER)
+         */
+        function drawScene() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const groundY = canvas.height - 60;
+
+            // Camera follow player
+            cameraX = player.x - canvas.width / 3;
+            if (cameraX < 0) cameraX = 0;
+            if (cameraX > WORLD_WIDTH - canvas.width) cameraX = WORLD_WIDTH - canvas.width;
+
+            ctx.save();
+            ctx.translate(-cameraX, 0);
+
+            // 1. Background Clouds
+            ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+            for (let i = 0; i < 10; i++) {
+                let cx = i * 200 + 40;
+                let cy = 50 + (i % 3) * 20;
+                ctx.beginPath();
+                ctx.arc(cx, cy, 20, 0, Math.PI * 2);
+                ctx.arc(cx + 15, cy - 10, 25, 0, Math.PI * 2);
+                ctx.arc(cx + 35, cy, 20, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // 2. Ground & Grass
+            ctx.fillStyle = "#16a34a"; // Green grass top
+            ctx.fillRect(0, groundY, WORLD_WIDTH, 16);
+            ctx.fillStyle = "#854d0e"; // Dirt bottom
+            ctx.fillRect(0, groundY + 16, WORLD_WIDTH, canvas.height - groundY);
+
+            // Ground decorative bricks
+            ctx.strokeStyle = "#a16207";
+            ctx.lineWidth = 2;
+            for (let bx = 0; bx < WORLD_WIDTH; bx += 40) {
+                ctx.strokeRect(bx, groundY + 16, 40, 20);
+            }
+
+            // 3. Question Blocks & Pipes
+            flagPositions.forEach((fp, idx) => {
+                // Warp Pipe near checkpoint
+                ctx.fillStyle = "#22c55e";
+                ctx.fillRect(fp - 60, groundY - 50, 40, 50);
+                ctx.fillStyle = "#15803d";
+                ctx.fillRect(fp - 65, groundY - 60, 50, 12);
+                ctx.strokeRect(fp - 65, groundY - 60, 50, 12);
+
+                // Question Block
+                let qbY = groundY - 110;
+                ctx.fillStyle = gameState.currentCP > idx ? "#94a3b8" : "#eab308";
+                ctx.fillRect(fp, qbY, 32, 32);
+                ctx.strokeStyle = "#78350f";
+                ctx.strokeRect(fp, qbY, 32, 32);
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 18px 'Press Start 2P', sans-serif";
+                ctx.fillText("?", fp + 8, qbY + 24);
+
+                // Checkpoint Flag
+                let isPassed = gameState.currentCP > idx;
+                ctx.fillStyle = "#475569";
+                ctx.fillRect(fp + 80, groundY - 120, 6, 120); // pole
+                
+                // Flag cloth
+                ctx.fillStyle = isPassed ? "#22c55e" : "#ef4444";
+                ctx.beginPath();
+                ctx.moveTo(fp + 86, groundY - 120);
+                ctx.lineTo(fp + 125, groundY - 100);
+                ctx.lineTo(fp + 86, groundY - 80);
+                ctx.fill();
+
+                // Checkpoint Text Label
+                ctx.fillStyle = "#0f172a";
+                ctx.font = "bold 12px Fredoka, sans-serif";
+                ctx.fillText(`CP ${idx + 1}`, fp + 72, groundY - 130);
+            });
+
+            // 4. End Castle at the end of world
+            let castleX = WORLD_WIDTH - 150;
+            ctx.fillStyle = "#64748b";
+            ctx.fillRect(castleX, groundY - 120, 100, 120);
+            ctx.fillRect(castleX + 25, groundY - 160, 50, 40);
+            // Castle Door
+            ctx.fillStyle = "#0f172a";
+            ctx.beginPath();
+            ctx.arc(castleX + 50, groundY - 30, 20, Math.PI, 0);
+            ctx.fillRect(castleX + 30, groundY - 30, 40, 30);
+            ctx.fill();
+
+            // 5. Player Character (Mario Retro Silhouette/Sprite)
+            ctx.fillStyle = "#ef4444"; // Red Shirt
+            ctx.fillRect(player.x, player.y + 12, player.width, 20);
+            ctx.fillStyle = "#1d4ed8"; // Blue Overalls
+            ctx.fillRect(player.x + 4, player.y + 28, player.width - 8, 16);
+            ctx.fillStyle = "#fde047"; // Yellow Buttons
+            ctx.fillRect(player.x + 8, player.y + 30, 4, 4);
+            ctx.fillRect(player.x + 24, player.y + 30, 4, 4);
+            // Head
+            ctx.fillStyle = "#fca5a5"; // Skin
+            ctx.fillRect(player.x + 6, player.y, 24, 14);
+            // Red Cap
+            ctx.fillStyle = "#dc2626";
+            ctx.fillRect(player.x + 4, player.y - 4, 28, 8);
+            // Eyes
+            ctx.fillStyle = "#000";
+            ctx.fillRect(player.x + (player.vx < 0 ? 8 : 22), player.y + 4, 4, 4);
+
+            ctx.restore();
+        }
+
+        /**
+         * GAME LOOP & PHYSICS
+         */
+        function updatePhysics() {
+            if (gameState.activeQuiz || gameState.gameCompleted) return;
+
+            // Horizontal movement
+            if (keys.left) {
+                player.vx = -player.speed;
+            } else if (keys.right) {
+                player.vx = player.speed;
+            } else {
+                player.vx *= 0.8; // Friction
+            }
+
+            player.x += player.vx;
+
+            // Boundary limits
+            if (player.x < 0) player.x = 0;
+            if (player.x > WORLD_WIDTH - player.width) player.x = WORLD_WIDTH - player.width;
+
+            // Gravity
+            player.vy += 0.5;
+            player.y += player.vy;
+
+            const groundY = canvas.height - 60 - player.height;
+            if (player.y >= groundY) {
+                player.y = groundY;
+                player.vy = 0;
+                player.grounded = true;
+            }
+
+            // Check Collision with current Checkpoint Flag
+            if (gameState.currentCP < CHECKPOINTS_DATA.length) {
+                let targetX = flagPositions[gameState.currentCP] + 70;
+                if (Math.abs(player.x - targetX) < 30) {
+                    // Trigger Quiz!
+                    triggerQuiz(gameState.currentCP);
+                }
+            } else if (player.x >= WORLD_WIDTH - 180) {
+                // Reached Castle! Trigger Bonus Challenge or Finish
+                triggerBonusChallenge();
+            }
+        }
+
+        function gameLoop() {
+            updatePhysics();
+            drawScene();
+            requestAnimationFrame(gameLoop);
+        }
+
+        /**
+         * QUIZ LOGIC & DISPLAY
+         */
+        function triggerQuiz(cpIndex) {
+            gameState.activeQuiz = true;
+            const data = CHECKPOINTS_DATA[cpIndex];
+
+            document.getElementById('quiz-world-title').innerText = data.title;
+            document.getElementById('quiz-checkpoint-badge').innerText = `${cpIndex + 1} / 5`;
+            
+            // Populate Vertical Math Format
+            document.getElementById('val1-rm').innerText = "RM " + data.v1_rm;
+            document.getElementById('val1-sen').innerText = data.v1_sen;
+            document.getElementById('val2-rm').innerText = "RM " + data.v2_rm;
+            document.getElementById('val2-sen').innerText = data.v2_sen;
+
+            document.getElementById('quiz-hint').innerHTML = `💡 <strong>Petunjuk:</strong> ${data.hint}`;
+
+            // Reset feedback display
+            const feedbackEl = document.getElementById('quiz-feedback');
+            feedbackEl.classList.add('hidden');
+
+            // Render option buttons
+            const optsContainer = document.getElementById('quiz-options');
+            optsContainer.innerHTML = '';
+
+            data.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "btn-retro bg-yellow-400 hover:bg-yellow-300 text-slate-900 text-xl font-bold py-3 px-4 rounded-2xl border-b-4 border-yellow-600 shadow-md w-full";
+                btn.innerText = opt;
+                btn.onclick = () => answerQuiz(opt, data.correct);
+                optsContainer.appendChild(btn);
+            });
+
+            document.getElementById('screen-quiz').classList.remove('hidden');
+        }
+
+        function answerQuiz(selected, correct) {
+            const feedbackEl = document.getElementById('quiz-feedback');
+            feedbackEl.classList.remove('hidden');
+
+            if (selected === correct) {
+                // Correct Answer!
+                snd.playCoin();
+                snd.playCorrect();
+                gameState.coins += 10;
+                gameState.score += 1;
+                updateHUD();
+
+                feedbackEl.className = "mt-3 text-center p-3 rounded-xl font-extrabold w-full text-base bg-green-100 text-green-800 border-2 border-green-400";
+                feedbackEl.innerText = "🎉 HEBAT! JAWAPAN BETUL! (+10 Syiling)";
+
+                setTimeout(() => {
+                    document.getElementById('screen-quiz').classList.add('hidden');
+                    gameState.activeQuiz = false;
+                    gameState.currentCP++;
+                    // Push player forward slightly
+                    player.x += 60;
+                }, 1400);
+
+            } else {
+                // Wrong Answer
+                snd.playWrong();
+                gameState.lives--;
+                updateHUD();
+
+                feedbackEl.className = "mt-3 text-center p-3 rounded-xl font-extrabold w-full text-base bg-red-100 text-red-800 border-2 border-red-400";
+                feedbackEl.innerText = "❌ CUBA LAGI! Perhatikan pengiraan nilai sen dan ringgit.";
+
+                if (gameState.lives <= 0) {
+                    setTimeout(() => {
+                        alert("Nyawa anda telah habis! Mari cuba lagi dari awal.");
+                        restartGame();
+                    }, 1200);
+                }
+            }
+        }
+
+        /**
+         * BONUS CHALLENGE & FINAL WORKSHEET
+         */
+        function triggerBonusChallenge() {
+            gameState.activeQuiz = true;
+            const container = document.getElementById('bonus-questions-container');
+            container.innerHTML = '';
+
+            BONUS_DATA.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = "bg-purple-50 p-3 rounded-2xl border-2 border-purple-200 flex flex-col sm:flex-row items-center justify-between gap-2";
+                div.innerHTML = `
+                    <span class="font-bold text-slate-700 text-sm md:text-base">${idx + 1}. ${item.q}</span>
+                    <div class="flex items-center space-x-1 font-bold">
+                        <span>RM</span>
+                        <input type="text" id="bonus-input-${idx}" placeholder="00.00" 
+                            class="w-24 p-2 text-center rounded-xl border-2 border-purple-300 font-mono text-base focus:outline-none focus:border-purple-600 bg-white" />
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            document.getElementById('screen-bonus').classList.remove('hidden');
+        }
+
+        function checkBonusAnswers() {
+            let correctCount = 0;
+            BONUS_DATA.forEach((item, idx) => {
+                const inputVal = document.getElementById(`bonus-input-${idx}`).value.trim();
+                if (inputVal === item.ans || inputVal === "RM " + item.ans || inputVal === "RM" + item.ans) {
+                    correctCount++;
+                }
+            });
+
+            gameState.bonusScore = correctCount;
+            gameState.coins += correctCount * 10;
+            updateHUD();
+
+            snd.playCorrect();
+            document.getElementById('screen-bonus').classList.add('hidden');
+            showEndScreen();
+        }
+
+        /**
+         * GAME LIFECYCLE & HUD
+         */
+        function updateHUD() {
+            document.getElementById('hud-lives').innerText = gameState.lives;
+            document.getElementById('hud-coins').innerText = gameState.coins;
+            
+            // NEW: Update Player Name & Class in HUD
+            const name = gameState.playerName || "Murid";
+            const kls = gameState.playerClass ? ` (${gameState.playerClass})` : "";
+            document.getElementById('hud-player-info').innerText = `Pemain: ${name}${kls}`;
+        }
+
+        // NEW: Validate Student Inputs Before Starting Game
+        function validateAndStartGame() {
+            const nameInput = document.getElementById('player-name').value.trim();
+            const classInput = document.getElementById('player-class').value.trim();
+            const errorMsg = document.getElementById('menu-error-msg');
+
+            if (!nameInput || !classInput) {
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            errorMsg.classList.add('hidden');
+            gameState.playerName = nameInput;
+            gameState.playerClass = classInput;
+            updateHUD();
+
+            startGame();
+        }
+
+        function startGame() {
+            snd.init();
+            snd.startBGM();
+            document.getElementById('screen-menu').classList.add('hidden');
+            gameState.activeQuiz = false;
+        }
+
+        function showInstructions() {
+            document.getElementById('screen-instructions').classList.remove('hidden');
+        }
+
+        function hideInstructions() {
+            document.getElementById('screen-instructions').classList.add('hidden');
+        }
+
+        function showEndScreen() {
+            gameState.gameCompleted = true;
+            document.getElementById('end-score').innerText = `${gameState.score} / ${CHECKPOINTS_DATA.length}`;
+            document.getElementById('end-coins').innerText = `${gameState.coins} 🪙`;
+            document.getElementById('end-bonus').innerText = `${gameState.bonusScore} / ${BONUS_DATA.length}`;
+            
+            // NEW: Render Player Info Badge on Victory Screen
+            const name = gameState.playerName || "Murid";
+            const kls = gameState.playerClass ? ` (${gameState.playerClass})` : "";
+            document.getElementById('end-player-badge').innerText = `👤 ${name}${kls}`;
+
+            document.getElementById('screen-end').classList.remove('hidden');
+        }
+
+        function restartGame() {
+            const prevName = gameState.playerName;
+            const prevClass = gameState.playerClass;
+
+            gameState = {
+                playerName: prevName,
+                playerClass: prevClass,
+                lives: 3,
+                coins: 0,
+                currentCP: 0,
+                score: 0,
+                bonusScore: 0,
+                activeQuiz: false,
+                gameCompleted: false
+            };
+            player.x = 50;
+            player.y = 200;
+            player.vx = 0;
+            player.vy = 0;
+            updateHUD();
+
+            document.getElementById('screen-end').classList.add('hidden');
+            document.getElementById('screen-quiz').classList.add('hidden');
+            document.getElementById('screen-bonus').classList.add('hidden');
+            document.getElementById('screen-menu').classList.remove('hidden');
+        }
+
+        // Initialize Loop on Page Load
+        window.onload = function() {
+            resizeCanvas();
+            requestAnimationFrame(gameLoop);
+        };
+    </script>
+</body>
+</html>
